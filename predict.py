@@ -3,9 +3,7 @@ import pandas as pd
 import numpy as np
 import os
 
-# -----------------------------
 # 1. Load the Models
-# -----------------------------
 # This logic ensures the script finds your models folder automatically
 script_dir = os.path.dirname(os.path.abspath(__file__))
 reg_path = os.path.join(script_dir, "models", "linear_rent_model.pkl")
@@ -45,9 +43,7 @@ def get_user_input():
         print("\nError: Please enter numbers for space, year, rooms, and 1/0 for binary fields.")
         return None
 
-# -----------------------------
 # 2. Prediction Engine
-# -----------------------------
 input_df = get_user_input()
 
 if input_df is not None:
@@ -65,9 +61,7 @@ if input_df is not None:
         # This model includes 'regio1' (State) to adjust for regional bubbles
         fairness_proba = clf_model.predict_proba(input_df)[0][1]
 
-        # -----------------------------
         # 3. Final Result Report
-        # -----------------------------
         print("\n" + "*"*50)
         print("                AUDIT REPORT                  ")
         print("*"*50)

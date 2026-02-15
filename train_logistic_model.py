@@ -12,9 +12,7 @@ from sklearn.metrics import classification_report, accuracy_score
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# -----------------------------
 # 1. Load Data & Linear Model
-# -----------------------------
 print("Loading data...")
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(script_dir, "data", "immo_data.csv")
@@ -23,9 +21,7 @@ model_path = os.path.join(script_dir, "models", "linear_rent_model.pkl")
 df = pd.read_csv(data_path)
 linear_model = joblib.load(model_path)
 
-# -----------------------------
 # 2. Preparation (Added 'regio1' for Location)
-# -----------------------------
 # Standard cleaning
 df = df[(df["livingSpace"] > 20) & (df["livingSpace"] < 250)]
 df = df[(df["baseRent"] > 200) & (df["baseRent"] < 5000)]
@@ -41,11 +37,8 @@ binary_features = ["lift", "balcony", "newlyConst"]
 features = numeric_features + categorical_features + binary_features
 df = df[features + ["rent_per_sqm"]].dropna()
 
-# -----------------------------
 # 3. Create the "Fair Deal" Label
-# -----------------------------
 # Use the Linear model to predict price
-# Note: Input features to linear_model must match its training features
 reg_features = ["livingSpace", "yearConstructed", "noRooms", "floor", "condition", "interiorQual", "lift", "balcony", "newlyConst"]
 predicted_log_price = linear_model.predict(df[reg_features])
 predicted_price = np.expm1(predicted_log_price)
@@ -54,17 +47,13 @@ predicted_price = np.expm1(predicted_log_price)
 # Adding a 5% buffer helps the model distinguish between 'noise' and 'actually expensive'
 df["is_fair_deal"] = (df["rent_per_sqm"] <= (predicted_price * 1.05)).astype(int)
 
-# -----------------------------
 # 4. Train-Test Split
-# -----------------------------
 X = df[features]
 y = df["is_fair_deal"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# -----------------------------
 # 5. Optimized Logistic Pipeline
-# -----------------------------
 preprocessor = ColumnTransformer(
     transformers=[
         ("num", StandardScaler(), numeric_features),
@@ -87,9 +76,7 @@ clf = Pipeline(steps=[
     ))
 ])
 
-# -----------------------------
 # 6. Train & Evaluate
-# -----------------------------
 print("Training Location-Aware Logistic Regression...")
 clf.fit(X_train, y_train)
 
@@ -103,9 +90,7 @@ print("\nClassification Report:")
 print(classification_report(y_test, y_pred))
 print("="*40)
 
-# -----------------------------
 # 7. Save
-# -----------------------------
 joblib.dump(clf, os.path.join(script_dir, "models", "logistic_fairness_model.pkl"))
 
 print("Generating Feature Importance plot...")
