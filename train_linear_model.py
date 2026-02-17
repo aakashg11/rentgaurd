@@ -8,7 +8,8 @@ from sklearn.preprocessing import OneHotEncoder, PolynomialFeatures, StandardSca
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import mean_absolute_error, r2_score
-
+import matplotlib.pyplot as plt
+import seaborn as sns
 # 1. Load dataset
 print("Loading dataset...")
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -28,6 +29,16 @@ df = df[(df["baseRent"] > 200) & (df["baseRent"] < 5000)]
 # Create target
 df["rent_per_sqm"] = df["baseRent"] / df["livingSpace"]
 
+#To show right-skewed distribution
+#justification of log transformation
+plt.figure(figsize=(8, 5))
+sns.histplot(df["rent_per_sqm"], bins=50, kde=True)
+plt.title("Figure 2: Distribution of Rent per m² (Before Log Transform)")
+plt.xlabel("Rent per m² (€)")
+plt.ylabel("Frequency")
+plt.tight_layout()
+plt.savefig("fig2_rent_per_sqm_before_log.png")
+plt.show()
 # REMOVE OUTLIERS: Keep only the middle 95% of the market. 
 # Values like 1€ or 100€/sqm are errors in the immo_data dataset.
 df = df[(df["rent_per_sqm"] >= 7) & (df["rent_per_sqm"] <= 35)]
@@ -48,6 +59,15 @@ df = df[features + [target]].dropna()
 X = df[features]
 y = np.log1p(df[target]) # LOG TRANSFORMATION to fix the skew
 
+#Demonstrates normalization of skew: Model Stability
+plt.figure(figsize=(8, 5))
+sns.histplot(y, bins=50, kde=True)
+plt.title("Figure 3: Distribution of Rent per m² (After Log Transform)")
+plt.xlabel("log(Rent per m²)")
+plt.ylabel("Frequency")
+plt.tight_layout()
+plt.savefig("fig3_rent_per_sqm_after_log.png")
+plt.show()
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
@@ -87,6 +107,32 @@ y_test_real = np.expm1(y_test)
 mae = mean_absolute_error(y_test_real, y_pred)
 r2 = r2_score(y_test_real, y_pred)
 
+#Visual proof of regression regression accuracy.
+plt.figure(figsize=(7, 7))
+plt.scatter(y_test_real, y_pred, alpha=0.4)
+plt.plot([y_test_real.min(), y_test_real.max()],
+         [y_test_real.min(), y_test_real.max()],
+         color="red", linestyle="--")
+
+plt.title("Figure 4: Predicted vs Actual Rent per m²")
+plt.xlabel("Actual Rent per m² (€)")
+plt.ylabel("Predicted Rent per m² (€)")
+plt.tight_layout()
+plt.savefig("fig4_predicted_vs_actual.png")
+plt.show()
+
+#To detect bias, heteroscedasticity and outliers
+residuals = y_test_real - y_pred
+
+plt.figure(figsize=(8, 5))
+sns.histplot(residuals, bins=50, kde=True)
+plt.axvline(0, color="red", linestyle="--")
+plt.title("Figure 5: Residual Distribution")
+plt.xlabel("Prediction Error (€ per m²)")
+plt.ylabel("Frequency")
+plt.tight_layout()
+plt.savefig("fig5_residual_distribution.png")
+plt.show()
 print("\n" + "="*40)
 print("UPDATED MODEL RESULTS")
 print("="*40)

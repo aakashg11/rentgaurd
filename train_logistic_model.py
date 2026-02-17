@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import joblib
-
+from sklearn.metrics import confusion_matrix
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, PolynomialFeatures
@@ -82,6 +82,18 @@ clf.fit(X_train, y_train)
 
 y_pred = clf.predict(X_test)
 
+
+#Evaluate classification quality beyond accuracy
+cm = confusion_matrix(y_test, y_pred)
+
+plt.figure(figsize=(6, 5))
+sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
+plt.title("Figure 6: Confusion Matrix – Fair vs Overpriced")
+plt.xlabel("Predicted Label")
+plt.ylabel("Actual Label")
+plt.tight_layout()
+plt.savefig("fig6_confusion_matrix.png")
+plt.show()
 print("\n" + "="*40)
 print("FINAL ENHANCED RESULTS")
 print("="*40)
