@@ -71,10 +71,10 @@ if input_df is not None:
         print("-" * 50)
         
         if fairness_proba > 0.5:
-            print("VERDICT: ✅ FAIR DEAL")
+            print("VERDICT: FAIR DEAL")
             print("Analysis: This price is competitive for this specific region and quality.")
         else:
-            print("VERDICT: ❌ POTENTIALLY OVERPRICED")
+            print("VERDICT: POTENTIALLY OVERPRICED")
             print("Analysis: This rent is significantly higher than market averages for this state.")
         print("*"*50 + "\n")
 
